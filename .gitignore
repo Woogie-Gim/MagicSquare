@@ -1,0 +1,17 @@
+# .gitignore
+
+# 언리얼 엔진에서 자동 생성되는 폴더들 (업로드 제외)
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Visual Studio 및 IDE 관련 파일들 (업로드 제외)
+.vs/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.xcworkspace
+*.DS_Store
