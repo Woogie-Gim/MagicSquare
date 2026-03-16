@@ -6,6 +6,8 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "MagicSquareHpWidget.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 AMagicSquareCharacter::AMagicSquareCharacter()
@@ -39,6 +41,20 @@ void AMagicSquareCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// 체력 초기화
+	CurrentHp = MaxHp;
+
+	// UI 위젯 생성 및 화면 출력
+	if (HpWidgetClass)
+	{
+		HpWidgetInstance = CreateWidget<UMagicSquareHpWidget>(GetWorld(), HpWidgetClass);
+		if (HpWidgetInstance)
+		{
+			HpWidgetInstance->AddToViewport();
+			HpWidgetInstance->UpdateHp(CurrentHp, MaxHp);
+		}
+	}
+
 	// Enhanced Input Local Player Subsystem 획득 및 매핑 컨텍스트 추가
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -67,6 +83,23 @@ void AMagicSquareCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMagicSquareCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMagicSquareCharacter::Look);
 	}
+}
+
+float AMagicSquareCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	// 부모 클래스 데미지 처리 수행
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	// 체력 감소 및 범위 제한
+	CurrentHp = FMath::Clamp(CurrentHp - ActualDamage, 0.0f, MaxHp);
+
+	// UI 갱신
+	if (HpWidgetInstance)
+	{
+		HpWidgetInstance->UpdateHp(CurrentHp, MaxHp);
+	}
+
+	return ActualDamage;
 }
 
 void AMagicSquareCharacter::Move(const FInputActionValue& Value)

@@ -26,6 +26,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// 데미지 처리 오버라이드
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 protected:
 	// 카메라 붐 (캐릭터 뒤에서 카메라를 일정 거리 유지해주는 역할)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
@@ -53,4 +56,19 @@ protected:
 	// 시점 회전 입력 처리 함수
 	void Look(const FInputActionValue& Value);
 
+	// 최대 체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float MaxHp = 100.0f;
+
+	// 현재 체력
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
+	float CurrentHp;
+
+	// UI 위젯 클래스
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<class UMagicSquareHpWidget> HpWidgetClass;
+
+	// 생성된 UI 위젯 인스턴스
+	UPROPERTY()
+	TObjectPtr<class UMagicSquareHpWidget> HpWidgetInstance;
 };
