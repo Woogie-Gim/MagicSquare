@@ -8,6 +8,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "MagicSquareHpWidget.h"
 #include "Blueprint/UserWidget.h"
+#include "AbilitySystemComponent.h"
+#include "GameplayAbilitySpec.h"
 
 // Sets default values
 AMagicSquareCharacter::AMagicSquareCharacter()
@@ -34,6 +36,9 @@ AMagicSquareCharacter::AMagicSquareCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	// 어빌리티 시스템 컴포넌트 생성
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -63,6 +68,18 @@ void AMagicSquareCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	if (AbilitySystemComponent != nullptr)
+	{
+		// 어빌리티 시스템 컴포넌트에게 오너와 아바타가 자신(this)임을 알려줌 (필수 초기화)
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+		if (RollAbilityClass != nullptr && HasAuthority())
+		{
+			FGameplayAbilitySpec Spec(RollAbilityClass, 1, INDEX_NONE, this);
+			AbilitySystemComponent->GiveAbility(Spec);
+		}
+	}
 }
 
 // Called every frame
@@ -82,6 +99,8 @@ void AMagicSquareCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMagicSquareCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMagicSquareCharacter::Look);
+		// 구르기 입력 액션 바인딩
+		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &AMagicSquareCharacter::Dodge);
 	}
 }
 
@@ -100,6 +119,15 @@ float AMagicSquareCharacter::TakeDamage(float DamageAmount, FDamageEvent const& 
 	}
 
 	return ActualDamage;
+}
+
+void AMagicSquareCharacter::Dodge()
+{
+	if (AbilitySystemComponent != nullptr && RollAbilityClass != nullptr)
+	{
+		// 부여된 어빌리티들 중 해당 클래스를 찾아 실행 시도
+		AbilitySystemComponent->TryActivateAbilityByClass(RollAbilityClass);
+	}
 }
 
 void AMagicSquareCharacter::Move(const FInputActionValue& Value)

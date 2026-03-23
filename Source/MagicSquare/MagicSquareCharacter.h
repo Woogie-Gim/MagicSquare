@@ -29,6 +29,9 @@ public:
 	// 데미지 처리 오버라이드
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	// 키보드 입력 시 호출할 구르기 실행 함수
+    void Dodge();
+
 protected:
 	// 카메라 붐 (캐릭터 뒤에서 카메라를 일정 거리 유지해주는 역할)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
@@ -49,6 +52,10 @@ protected:
 	// 시점 회전 입력 액션
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> LookAction;
+
+	// 구르기 입력 액션
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> DodgeAction;
 
 	// 이동 입력 처리 함수
 	void Move(const FInputActionValue& Value);
@@ -71,4 +78,12 @@ protected:
 	// 생성된 UI 위젯 인스턴스
 	UPROPERTY()
 	TObjectPtr<class UMagicSquareHpWidget> HpWidgetInstance;
+
+	// 에디터에서 할당할 구르기 어빌리티 클래스 (BP_GA_Roll)
+	UPROPERTY(EditDefaultsOnly, Category = "GAS")
+	TSubclassOf<class UGameplayAbility> RollAbilityClass;
+
+	// 캐릭터가 가지고 있는 어빌리티 시스템 컴포넌트 포인터
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
+	TObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
 };
