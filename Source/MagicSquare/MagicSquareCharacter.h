@@ -69,6 +69,9 @@ protected:
 	// 시점 회전 입력 처리 함수
 	void Look(const FInputActionValue& Value);
 
+	// 궤적 분석 및 마법진 판별 함수
+	void AnalyzeDrawing();
+
 	// 최대 체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float MaxHp = 100.0f;
